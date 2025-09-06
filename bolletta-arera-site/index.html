@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Bolletta Facile • ARERA Helper</title>
+  <meta name="description" content="Leggi e capisci la tua bolletta luce in modo semplice. Grafici PUN, simulatore, glossario e guida passo‑passo.">
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+  <link rel="stylesheet" href="assets/css/styles.css">
+  <!-- Chart.js and PapaParse -->
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.js"></script>
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+  <script defer src="assets/js/app.js"></script>
+</head>
+<body>
+  <header class="site-header">
+    <div class="container row">
+      <div class="brand">
+        <span class="logo">⚡</span>
+        <div>
+          <strong>Bolletta Facile</strong>
+          <small class="muted">ARERA Helper</small>
+        </div>
+      </div>
+      <nav class="nav">
+        <a href="#guida">Guida</a>
+        <a href="#componenti">Componenti</a>
+        <a href="#grafici">Grafici</a>
+        <a href="#opendata">Open Data</a>
+        <a href="#glossario">Glossario</a>
+        <a href="#simulatore" class="btn">Simulatore</a>
+      </nav>
+    </div>
+    <div class="live-pun">
+      <div class="container row">
+        <div>
+          <div class="muted">PUN Index GME oggi</div>
+          <div class="value"><span id="punValue">--</span><span class="unit">€/kWh</span><span id="punChange" class="chip"></span></div>
+        </div>
+        <div class="row gap">
+          <div class="pulse"></div>
+          <div class="muted">Aggiornato: <span id="updateTime">--</span></div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <!-- HERO -->
+    <section class="card hero">
+      <h1>Capire la bolletta è facile</h1>
+      <p>Questa pagina ti spiega cos’è ogni voce, mostra i grafici più utili e ti permette di fare una stima veloce della spesa mensile.</p>
+      <div class="row wrap gap">
+        <a class="btn primary" href="#guida">Inizia dalla guida</a>
+        <a class="btn" href="#simulatore">Vai al simulatore</a>
+      </div>
+    </section>
+
+    <!-- GUIDA -->
+    <section id="guida" class="card">
+      <h2>Guida rapida alla bolletta</h2>
+      <ol class="steps">
+        <li><strong>Materia energia</strong> — è il costo dell’energia che consumi. Dipende dal mercato (fisso/variabile) e dal <abbr title="Prezzo Unico Nazionale">PUN</abbr>.</li>
+        <li><strong>Trasporto e contatore</strong> — porta l’energia fino a casa tua e copre il contatore. È standard nazionale.</li>
+        <li><strong>Oneri di sistema</strong> — costi generali (rinnovabili, bonus, ricerca).</li>
+        <li><strong>Imposte</strong> — accisa e IVA.</li>
+      </ol>
+      <details class="tips"><summary>Consigli pratici</summary>
+        <ul>
+          <li>Se consumi soprattutto la sera/weekend, verifica l’offerta <b>bioraria</b> (F23).</li>
+          <li>Controlla la <b>potenza impegnata</b>: se è troppo alta per i tuoi usi, potresti risparmiare.</li>
+          <li>Con il <b>simulatore</b> sotto puoi stimare una bolletta tipo con i tuoi dati.</li>
+        </ul>
+      </details>
+    </section>
+
+    <!-- COMPONENTI -->
+    <section id="componenti" class="card">
+      <h2>Componenti tariffarie (in breve)</h2>
+      <div class="grid two">
+        <div>
+          <h3>Materia energia</h3>
+          <ul class="list">
+            <li><span class="code">PE</span> Prezzo energia — <span id="peValue">0.16053</span> €/kWh</li>
+            <li><span class="code">PD</span> Dispacciamento — <span id="pdValue">0.00693</span> €/kWh</li>
+            <li><span class="code">PPE</span> Perequazione — variabile</li>
+            <li><span class="code">PCV</span> Commercializzazione — <span id="pcvValue">41.32</span> €/anno</li>
+          </ul>
+        </div>
+        <div>
+          <h3>Rete e oneri</h3>
+          <ul class="list">
+            <li><span class="code">τ1</span> Quota fissa rete — <span id="t1Value">23.20</span> €/POD/anno</li>
+            <li><span class="code">τ2</span> Quota potenza — <span id="t2Value">21.22</span> €/kW/anno</li>
+            <li><span class="code">τ3</span> Quota energia rete — <span id="t3Value">0.00787</span> €/kWh</li>
+            <li><span class="code">ASOS</span> Rinnovabili — <span id="asosValue">0.029677</span> €/kWh</li>
+            <li><span class="code">ARIM</span> Altri oneri — <span id="arimValue">0.001645</span> €/kWh</li>
+          </ul>
+        </div>
+      </div>
+      <p class="muted small">Valori dimostrativi. I clienti nel servizio di tutela seguono gli aggiornamenti ARERA.</p>
+    </section>
+
+    <!-- GRAFICI -->
+    <section id="grafici" class="card">
+      <h2>Grafici e trend</h2>
+      <div class="chart-card">
+        <h3>PUN Index GME (ultimi 12 mesi)</h3>
+        <canvas id="punChart" height="140"></canvas>
+      </div>
+      <div class="grid two">
+        <div class="chart-card">
+          <h3>Composizione bolletta tipo</h3>
+          <canvas id="billChart" height="160"></canvas>
+        </div>
+        <div class="chart-card">
+          <h3>Confronto fasce orarie</h3>
+          <canvas id="fasceChart" height="160"></canvas>
+        </div>
+      </div>
+    </section>
+
+    <!-- OPENDATA -->
+    <section id="opendata" class="card">
+      <h2>Open Data ARERA (Portale Offerte)</h2>
+      <p>Scarica l’ultimo CSV disponibile o carica un file locale. Se il download diretto fallisce (succede per limiti del server), usa l’<b>upload</b> o il <b>copia/incolla</b>.</p>
+      <div class="grid three gap-v">
+        <div class="stack">
+          <label>Commodity</label>
+          <select id="odComm" class="ctl">
+            <option value="E" selected>Elettricità (E)</option>
+            <option value="G">Gas (G)</option>
+          </select>
+        </div>
+        <div class="stack">
+          <label>Data (opzionale)</label>
+          <input id="odDate" type="date" class="ctl">
+        </div>
+        <div class="stack">
+          <label>&nbsp;</label>
+          <button id="btnAuto" class="btn primary">Scarica ultimo disponibile</button>
+        </div>
+      </div>
+
+      <details class="mt">
+        <summary>Metodi alternativi (se il download non va)</summary>
+        <div class="grid two gap-v">
+          <div class="stack">
+            <label>Carica CSV locale</label>
+            <input id="fileInput" type="file" accept=".csv" class="ctl">
+          </div>
+          <div class="stack">
+            <label>Incolla CSV</label>
+            <textarea id="pasteArea" class="ctl" rows="4" placeholder="Incolla qui il contenuto CSV…"></textarea>
+            <button id="btnParsePaste" class="btn">Carica da testo</button>
+          </div>
+        </div>
+      </details>
+
+      <p id="odStatus" class="muted"></p>
+      <div id="odSource" class="mt small"></div>
+      <div id="tableWrap" class="table-wrap" style="display:none; max-height:60vh;">
+        <table id="odTable"></table>
+      </div>
+    </section>
+
+    <!-- GLOSSARIO -->
+    <section id="glossario" class="card">
+      <div class="row space-between">
+        <h2>Glossario (energia & distribuzione)</h2>
+        <input id="gSearch" class="ctl" placeholder="Cerca un termine…">
+      </div>
+      <div id="gGrid" class="grid two mt"></div>
+    </section>
+
+    <!-- SIMULATORE -->
+    <section id="simulatore" class="card">
+      <h2>Simulatore rapido</h2>
+      <div class="grid three gap-v">
+        <div class="stack">
+          <label>Consumo mensile (kWh)</label>
+          <input id="sConsumo" type="number" value="230" class="ctl">
+        </div>
+        <div class="stack">
+          <label>Potenza impegnata (kW)</label>
+          <input id="sPotenza" type="number" step="0.5" value="3" class="ctl">
+        </div>
+        <div class="stack">
+          <label>Tipo utenza</label>
+          <select id="sTipo" class="ctl">
+            <option value="residente">Domestico residente</option>
+            <option value="non-residente">Domestico non residente</option>
+          </select>
+        </div>
+      </div>
+      <button id="btnCalc" class="btn primary mt">Calcola</button>
+      <div id="sOut" class="mt" style="display:none;"></div>
+      <p class="muted small mt">Calcolo semplificato per uso didattico.</p>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container row space-between">
+      <small class="muted">© 2025 Bolletta Facile • Non affiliato ARERA • Dati e valori a scopo informativo</small>
+      <a class="arera" href="https://www.arera.it/" target="_blank" rel="noopener">Sito ARERA ↗</a>
+    </div>
+  </footer>
+</body>
+</html>
